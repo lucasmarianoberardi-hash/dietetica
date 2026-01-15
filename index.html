@@ -117,8 +117,8 @@
 
     <script>
         // --- PEGA AQUÍ TUS URLS DE GOOGLE SHEETS ---
-        const productsUrl = 'TU_CSV_DE_PRODUCTOS_AQUI';
-        const securityCodeUrl = 'TU_URL_DE_CODIGO_SEGURIDAD_AQUI';
+        const productsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbHZgDDAVSfbF5R7HlIrv_2w8_ZZOx87Ssf96f9-5mBIIhg3_qofvXaK0TElyogxjN7BI7PJn2l/pub?output=csv';
+        const securityCodeUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbHZgDDAVSfbF5R7HlIrv_2w8_ZZOx87Ssf96f9-5mBIIhg3_qofvXaK0TElyogxjN7BI7PJn2l/pub?output=csv&range=A2';
 
         let allProducts = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -321,4 +321,5 @@
         document.addEventListener('DOMContentLoaded', checkSecurity);
     </script>
 </body>
+
 </html>
