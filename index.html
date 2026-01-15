@@ -13,19 +13,20 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0; padding: 0; background-color: #f4f4f4;
             opacity: 0; transition: opacity 0.5s;
         }
 
-        /* --- Pantalla de Seguridad --- */
+        /* Pantalla de Seguridad */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--primary-color); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 9999; color: white;
+            opacity: 1 !important;
         }
 
-        /* --- Barra Inferior --- */
+        /* Navbar Inferior */
         .navbar {
             position: fixed; bottom: 0; width: 100%; background: white;
             display: flex; justify-content: space-around; padding: 10px 0;
@@ -34,9 +35,8 @@
 
         .nav-item { cursor: pointer; text-align: center; font-size: 0.8em; color: var(--primary-color); }
 
-        /* --- Productos --- */
+        /* Contenedor de Productos */
         .container { padding: 20px; padding-bottom: 80px; max-width: 800px; margin: auto; }
-        .category h2 { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); padding-bottom: 5px; margin-top: 30px; }
         
         .producto {
             background: white; border-radius: 8px; margin-bottom: 15px; padding: 15px;
@@ -46,18 +46,9 @@
         .producto img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; }
         .producto-info { flex: 1; }
 
-        /* --- Lógica de Pesables UI --- */
-        .weight-input-container {
-            display: flex; align-items: center; gap: 5px; margin: 10px 0;
-        }
-        .weight-input {
-            width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-align: center;
-        }
-        .producto-actions button {
-            padding: 8px 15px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;
-        }
+        .weight-input-container { display: flex; align-items: center; gap: 5px; margin: 10px 0; }
+        .weight-input { width: 70px; padding: 5px; text-align: center; }
 
-        /* --- Paneles --- */
         #cart, #qr-scanner-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; display: none; flex-direction: column; z-index: 2000;
@@ -75,9 +66,10 @@
     <div id="login-screen">
         <h2>DIETÉTICA VIRGILIO</h2>
         <form id="login-form" style="display: flex; flex-direction: column; align-items: center;">
-            <input type="password" id="security-input" name="password" placeholder="Código de acceso" 
+            <input type="password" id="security-input" name="password" 
+                   autocomplete="current-password" placeholder="Código de acceso" 
                    style="padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; text-align: center;">
-            <button type="submit" style="padding: 10px 25px; background-color: var(--accent-color); color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            <button type="submit" style="padding: 10px 25px; background: var(--accent-color); border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                 ACCEDER
             </button>
         </form>
@@ -85,22 +77,23 @@
     </div>
 
     <div class="container">
-        <input type="text" id="search" placeholder="🔍 Buscar productos..." style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ddd; display: none; margin-bottom: 15px;">
+        <input type="text" id="search" placeholder="🔍 Buscar productos..." 
+               style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ddd; display: none; margin-bottom: 15px; box-sizing: border-box;">
         <div id="products"></div>
     </div>
 
     <div id="qr-scanner-container">
         <div id="reader"></div>
-        <button id="close-qr-scanner" style="margin-top: 20px; padding: 15px; background: #666; color: white; border: none;">Cerrar Cámara</button>
+        <button id="close-qr-scanner" style="margin-top: 20px; padding: 15px; background: #666; color: white; border: none; border-radius: 5px;">Cerrar Cámara</button>
     </div>
 
     <div id="cart">
         <h2 style="color: var(--primary-color);">Tu Pedido</h2>
         <ul id="cart-items" style="list-style: none; padding: 0; flex: 1; overflow-y: auto;"></ul>
         <div id="cart-summary">
-            <h3>Total: $<span id="cart-total">0.00</span></h3>
-            <button id="send-order-button" style="width: 100%; padding: 15px; background: #25d366; color: white; border: none; font-weight: bold;">PEDIR POR WHATSAPP</button>
-            <button id="close-cart-button" style="width: 100%; margin-top: 10px; padding: 10px; border: none; background: #eee;">CERRAR</button>
+            <h3 style="border-top: 1px solid #eee; padding-top: 10px;">Total: $<span id="cart-total">0.00</span></h3>
+            <button id="send-order-button" style="width: 100%; padding: 15px; background: #25d366; color: white; border: none; border-radius: 5px; font-weight: bold;">PEDIR POR WHATSAPP</button>
+            <button id="close-cart-button" style="width: 100%; margin-top: 10px; padding: 10px; border: none; background: #eee;">VOLVER</button>
         </div>
     </div>
 
@@ -111,20 +104,19 @@
         <div class="nav-item" id="cart-icon">🛒<br>Carrito<span id="cart-count" style="display:none; background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px;">0</span></div>
     </nav>
 
-    <div id="category-menu" style="display:none; position:fixed; bottom:60px; left:0; width:100%; background:white; z-index:900; border-top:1px solid #ddd; max-height: 50vh; overflow-y: auto;">
+    <div id="category-menu" style="display:none; position:fixed; bottom:60px; left:0; width:100%; background:white; z-index:900; border-top:1px solid #ddd; max-height: 40vh; overflow-y: auto;">
         <ul id="category-list" style="list-style:none; padding:20px; margin:0;"></ul>
     </div>
 
     <script>
-        // --- PEGA AQUÍ TUS URLS DE GOOGLE SHEETS ---
-        const productsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbHZgDDAVSfbF5R7HlIrv_2w8_ZZOx87Ssf96f9-5mBIIhg3_qofvXaK0TElyogxjN7BI7PJn2l/pub?output=csv';
-        const securityCodeUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbHZgDDAVSfbF5R7HlIrv_2w8_ZZOx87Ssf96f9-5mBIIhg3_qofvXaK0TElyogxjN7BI7PJn2l/pub?output=csv&range=A2';
+        // --- PEGA TUS LINKS AQUÍ ---
+        const productsUrl = 'PEGAR_AQUI_LINK_CSV'; 
+        const securityCodeUrl = 'PEGAR_AQUI_LINK_TXT';
 
         let allProducts = [];
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let html5QrcodeScanner = null;
 
-        // Seguridad
         async function checkSecurity() {
             try {
                 const res = await fetch(securityCodeUrl);
@@ -141,7 +133,13 @@
                         document.getElementById('error-message').style.display = 'block';
                     }
                 };
-            } catch (e) { document.body.style.opacity = '1'; loadData(); }
+            } catch (e) { 
+                console.error("Error cargando código de seguridad");
+                // Si falla la carga del código, mostramos la web por si acaso
+                document.getElementById('login-screen').style.display = 'none';
+                document.body.style.opacity = '1';
+                loadData();
+            }
         }
 
         async function loadData() {
@@ -152,16 +150,18 @@
                 renderProducts(allProducts);
                 renderCategories();
                 updateCartUI();
-            } catch (error) { console.error("Error cargando CSV"); }
+            } catch (error) { console.error("Error cargando productos"); }
         }
 
         function parseCSV(text) {
             const lines = text.split('\n');
             const headers = lines[0].split(',').map(h => h.trim());
             return lines.slice(1).map(line => {
-                const values = line.split(',');
+                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Maneja comas dentro de comillas
                 let obj = {};
-                headers.forEach((h, i) => obj[h] = values[i]?.trim().replace(/^"|"$/g, ''));
+                headers.forEach((h, i) => {
+                    if (values[i]) obj[h] = values[i].trim().replace(/^"|"$/g, '');
+                });
                 return obj;
             }).filter(p => p['Nombre del Producto']);
         }
@@ -186,7 +186,7 @@
                     const item = document.createElement('div');
                     item.className = 'producto';
                     item.innerHTML = `
-                        <img src="${p['URL de la Imagen']}" onerror="this.src='https://via.placeholder.com/100'">
+                        <img src="${p['URL de la Imagen'] || 'https://via.placeholder.com/100'}" onerror="this.src='https://via.placeholder.com/100'">
                         <div class="producto-info">
                             <h3>${p['Nombre del Producto']}</h3>
                             <p>${isPesable ? `Kilo: $${precioKilo}` : `Precio: $${precioUnit}`}</p>
@@ -197,9 +197,12 @@
                                         <span>gr.</span>
                                     </div>
                                 ` : `
-                                    <input type="number" value="1" min="1" style="width:40px;">
+                                    <input type="number" value="1" min="1" style="width:40px; padding:5px;">
                                 `}
-                                <button onclick="handleAdd('${p['Nombre del Producto'].replace(/'/g, "\\'")}', this)">Agregar</button>
+                                <button onclick="handleAdd('${p['Nombre del Producto'].replace(/'/g, "\\'")}', this)" 
+                                        style="background: var(--primary-color); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor:pointer;">
+                                    Agregar
+                                </button>
                             </div>
                         </div>
                     `;
@@ -219,9 +222,11 @@
                     const finalPrice = (parseFloat(p.Kilo) / 1000) * val;
                     addToCart(`${p['Nombre del Producto']} (${val}gr)`, finalPrice, 1);
                     input.value = '';
-                } else { alert("Ingresa los gramos"); }
+                } else { alert("Ingresa los gramos (mínimo 10)"); }
             } else {
-                addToCart(p['Nombre del Producto'], parseFloat(p.Precio), val);
+                if (val >= 1) {
+                    addToCart(p['Nombre del Producto'], parseFloat(p.Precio), val);
+                }
             }
         }
 
@@ -243,26 +248,29 @@
                 const li = document.createElement('li');
                 li.style.padding = "10px"; li.style.borderBottom = "1px solid #eee";
                 li.innerHTML = `<strong>${item.name}</strong><br>Cant: ${item.qty} - $${(item.price * item.qty).toFixed(2)} 
-                <button onclick="remove(${i})" style="float:right; color:red; border:none; background:none;">✖</button>`;
+                <button onclick="remove(${i})" style="float:right; color:red; border:none; background:none; cursor:pointer; font-size:1.2em;">✖</button>`;
                 list.appendChild(li);
             });
             document.getElementById('cart-total').textContent = total.toFixed(2);
-            document.getElementById('cart-count').textContent = cart.length;
-            document.getElementById('cart-count').style.display = cart.length ? 'flex' : 'none';
+            const count = cart.reduce((acc, item) => acc + item.qty, 0);
+            document.getElementById('cart-count').textContent = count;
+            document.getElementById('cart-count').style.display = count ? 'flex' : 'none';
         }
 
         window.remove = (i) => { cart.splice(i,1); localStorage.setItem('cart', JSON.stringify(cart)); updateCartUI(); };
 
-        // --- NAVEGACIÓN Y QR ---
+        // NAVEGACIÓN
         document.getElementById('qr-scan-icon').onclick = () => {
             document.getElementById('qr-scanner-container').style.display = 'flex';
-            if(!html5QrcodeScanner) html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            if(!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
+            }
             html5QrcodeScanner.render((text) => {
                 const found = allProducts.find(p => p['Nombre del Producto'].toLowerCase() === text.trim().toLowerCase());
                 if(found) {
-                    addToCart(found['Nombre del Producto'], parseFloat(found.Precio), 1);
+                    addToCart(found['Nombre del Producto'], parseFloat(found.Precio || 0), 1);
                     stopQr();
-                    showNotification("Escaneado con éxito");
+                    showNotification("Producto escaneado");
                 }
             });
         };
@@ -276,6 +284,7 @@
         document.getElementById('search-icon').onclick = () => {
             const s = document.getElementById('search');
             s.style.display = s.style.display === 'none' ? 'block' : 'none';
+            if(s.style.display === 'block') s.focus();
         };
 
         document.getElementById('search').oninput = (e) => {
@@ -287,7 +296,7 @@
         document.getElementById('send-order-button').onclick = () => {
             if(cart.length === 0) return alert("Carrito vacío");
             let msg = "🛍️ *PEDIDO DIETÉTICA VIRGILIO*\n------------------\n";
-            cart.forEach(i => msg += `• ${i.name} x${i.qty}\n`);
+            cart.forEach(i => msg += `• ${i.name} x${i.qty} - $${(i.price * i.qty).toFixed(2)}\n`);
             msg += `------------------\n*TOTAL: $${document.getElementById('cart-total').textContent}*`;
             window.open(`https://wa.me/5491164708681?text=${encodeURIComponent(msg)}`);
         };
@@ -296,12 +305,12 @@
         document.getElementById('close-cart-button').onclick = () => document.getElementById('cart').style.display = 'none';
 
         function renderCategories() {
-            const cats = [...new Set(allProducts.map(p => p.Categoría))];
+            const cats = [...new Set(allProducts.map(p => p.Categoría))].sort();
             const list = document.getElementById('category-list');
             list.innerHTML = '';
             cats.forEach(c => {
                 const li = document.createElement('li');
-                li.style.padding = "10px"; li.style.borderBottom = "1px solid #eee";
+                li.style.padding = "15px"; li.style.borderBottom = "1px solid #eee";
                 li.innerHTML = `<a href="#cat-${c.replace(/\s/g,'')}" style="color:black; text-decoration:none; display:block;">${c}</a>`;
                 li.onclick = () => document.getElementById('category-menu').style.display = 'none';
                 list.appendChild(li);
@@ -318,8 +327,7 @@
             document.body.appendChild(n); setTimeout(() => n.remove(), 2000);
         }
 
-        document.addEventListener('DOMContentLoaded', checkSecurity);
+        checkSecurity();
     </script>
 </body>
-
 </html>
