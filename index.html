@@ -1162,21 +1162,18 @@ if (productData['Descripción Completa']) {
             oldCartItemsContainer.parentNode.replaceChild(newCartItemsContainer, oldCartItemsContainer);
             attachCartEventListeners();
             
-            // --- INICIO: LÓGICA DE GENERACIÓN DEL TICKET DE IMPRESIÓN ---
-            let printContent = `
-                <div class="print-ticket">
-                    <h1 style="text-align: center; font-size: 1.2em; margin-bottom: 5px;">DIETÉTICA VIRGILIO</h1>
-                    <p style="text-align: center; font-size: 0.9em; border-bottom: 1px dashed black;">Ticket de Pedido - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
-                    <div style="margin-top: 10px; border-bottom: 1px solid black; padding-bottom: 5px;">
-                        <span style="font-weight: bold; display: inline-block; width: 45%;">PRODUCTO</span>
-                        <span style="font-weight: bold; display: inline-block; width: 20%; text-align: center;">CANT</span>
-                        <span style="font-weight: bold; display: inline-block; width: 30%; text-align: right;">TOTAL</span>
-                    </div>
-            `;
-            
+            // --- FUNCIÓN DE IMPRESIÓN SIMPLIFICADA (NUEVA SOLUCIÓN) ---
+        function printCart() {
+            if (cart.length === 0) {
+                showNotification('El carrito está vacío. Nada que imprimir.');
+                return;
+            }
+
             let rawSubtotal = 0;
             let finalTotalTicket = 0;
+            let ticketItemsHTML = '';
 
+            // 1. GENERAR EL CONTENIDO DEL TICKET AQUÍ (SÍNCRONO)
             cart.forEach(item => {
                 const calculation = calculateItemTotal(item);
                 const itemTotal = calculation.itemTotal;
@@ -1184,37 +1181,83 @@ if (productData['Descripción Completa']) {
                 finalTotalTicket += itemTotal;
                 rawSubtotal += item.price * item.quantity;
 
+                const itemName = item.name.length > 30 ? item.name.substring(0, 27) + '...' : item.name;
 
-                printContent += `
+                ticketItemsHTML += `
                     <div style="display: flex; justify-content: space-between; margin: 3px 0;">
-                        <span style="max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</span>
-                        <span style="text-align: center;">${item.quantity}</span>
-                        <span style="text-align: right;">$${itemTotal.toFixed(2)}${discountMessage ? '*' : ''}</span>
+                        <span style="max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${itemName}</span>
+                        <span style="text-align: center; width: 20%;">${item.quantity}</span>
+                        <span style="text-align: right; width: 35%;">$${itemTotal.toFixed(2)}${discountMessage ? '*' : ''}</span>
                     </div>
                 `;
             });
             
             const totalDiscount = rawSubtotal - finalTotalTicket;
 
-            printContent += `
-                    <div style="border-top: 1px dashed black; margin-top: 10px; padding-top: 5px;">
-                        <p style="display: flex; justify-content: space-between; margin: 2px 0;"><span>Subtotal:</span><span style="font-weight: bold;">$${rawSubtotal.toFixed(2)}</span></p>
-                        <p style="display: flex; justify-content: space-between; margin: 2px 0; color: green;"><span>Descuento:</span><span style="font-weight: bold;">-$${totalDiscount.toFixed(2)}</span></p>
-                        <h3 style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 1.1em;"><span>TOTAL A PAGAR:</span><span>$${finalTotalTicket.toFixed(2)}</span></h3>
-                    </div>
-                    ${totalDiscount > 0 ? '<p style="font-size: 0.8em; margin-top: 5px; text-align: center;">* Descuento aplicado por volumen</p>' : ''}
-                    <p style="text-align: center; margin-top: 15px; font-size: 0.8em;">¡Gracias por tu compra!</p>
-                </div>
+            const printContent = `
+                <html>
+                    <head>
+                        <title>Ticket</title>
+                        <style>
+                            @page { size: 80mm auto; margin: 0; }
+                            body { 
+                                width: 80mm; 
+                                font-family: monospace; 
+                                font-size: 9pt; 
+                                margin: 0;
+                                padding: 0;
+                                color: black;
+                            }
+                            .print-ticket * {
+                                color: black !important;
+                                background: none !important;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="print-ticket" style="width: 80mm; font-family: monospace; font-size: 9pt;">
+                            <h1 style="text-align: center; font-size: 1.2em; margin-bottom: 5px;">DIETÉTICA VIRGILIO</h1>
+                            <p style="text-align: center; font-size: 0.9em; border-bottom: 1px dashed black; padding-bottom: 5px;">Ticket de Pedido - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+                            <div style="margin-top: 10px; border-bottom: 1px solid black; padding-bottom: 5px; display: flex;">
+                                <span style="font-weight: bold; width: 45%;">PRODUCTO</span>
+                                <span style="font-weight: bold; width: 20%; text-align: center;">CANT</span>
+                                <span style="font-weight: bold; width: 35%; text-align: right;">TOTAL</span>
+                            </div>
+                            
+                            ${ticketItemsHTML}
+                            
+                            <div style="border-top: 1px dashed black; margin-top: 10px; padding-top: 5px;">
+                                <p style="display: flex; justify-content: space-between; margin: 2px 0;"><span>Subtotal:</span><span style="font-weight: bold;">$${rawSubtotal.toFixed(2)}</span></p>
+                                <p style="display: flex; justify-content: space-between; margin: 2px 0;"><span>Descuento:</span><span style="font-weight: bold;">-$${totalDiscount.toFixed(2)}</span></p>
+                                <h3 style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 1.1em;"><span>TOTAL A PAGAR:</span><span>$${finalTotalTicket.toFixed(2)}</span></h3>
+                            </div>
+                            ${totalDiscount > 0 ? '<p style="font-size: 0.8em; margin-top: 5px; text-align: center;">* Descuento aplicado por volumen</p>' : ''}
+                            <p style="text-align: center; margin-top: 15px; font-size: 0.8em;">¡Gracias por tu compra!</p>
+                        </div>
+                    </body>
+                </html>
             `;
-
-            // 1. Elimina cualquier ticket anterior en el body
-            document.querySelectorAll('.print-ticket').forEach(el => el.remove());
-            // 2. Crea un div temporal para contener el HTML del ticket
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = printContent;
-            // 3. Añade el primer hijo (el div.print-ticket) al body de la página
-            document.body.appendChild(tempDiv.firstChild); 
-            // --- FIN: LÓGICA DE GENERACIÓN DEL TICKET DE IMPRESIÓN ---
+            
+            // 2. ABRIR UNA NUEVA VENTANA, ESCRIBIR EL CONTENIDO Y FORZAR LA IMPRESIÓN
+            // Usar window.open() es más seguro que manipular un iframe en el DOM principal.
+            const printWindow = window.open('', '_blank', 'width=350,height=400');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            // 3. Forzamos la impresión después de la carga
+            printWindow.onload = () => {
+                 printWindow.focus();
+                 printWindow.print();
+                 // Cerramos la ventana después de la impresión
+                 setTimeout(() => {
+                    printWindow.close();
+                 }, 500);
+            };
+            
+            // 4. Cerramos el carrito principal para no distraer
+            document.getElementById('cart').style.display = 'none';
+        }
+        // --- FIN FUNCIÓN DE IMPRESIÓN SIMPLIFICADA ---
         }
 
         function attachCartEventListeners() {
@@ -1475,3 +1518,4 @@ if (productData['Descripción Completa']) {
 </body>
 
 </html>
+
