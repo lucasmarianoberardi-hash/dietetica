@@ -992,48 +992,49 @@ const securityCodeUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbH
                             imgOrganico.title = 'Organico';
                             propiedadesContainer.appendChild(imgOrganico);
                         }
-// Lógica usando las dos columnas existentes
-if (productData['Descripción Completa']) {
-    const descripcionContainer = document.createElement('div');
-    descripcionContainer.classList.add('descripcion-container');
 
-    // Creamos el elemento de texto
-    const textoDescripcion = document.createElement('span');
-    textoDescripcion.classList.add('descripcion-texto');
-    
-    // Usamos la versión corta por defecto
-    const corta = productData['Descripción Corta'] || '';
-    const completa = productData['Descripción Completa'];
-    
-    textoDescripcion.textContent = corta;
-    descripcionContainer.appendChild(textoDescripcion);
-
-    // Solo añadimos el botón si la descripción completa es distinta a la corta
-    if (completa.length > corta.length) {
-        const leerMasBtn = document.createElement('button');
-        leerMasBtn.classList.add('leer-mas-btn');
-        leerMasBtn.innerHTML = ' &#9660;'; // Flecha hacia abajo
-        leerMasBtn.style.cursor = 'pointer';
-
-        let isExpanded = false;
-
-        leerMasBtn.onclick = function() {
-            isExpanded = !isExpanded;
-            if (isExpanded) {
-                textoDescripcion.textContent = completa;
-                leerMasBtn.innerHTML = ' &#9650;'; // Flecha hacia arriba
-            } else {
-                textoDescripcion.textContent = corta;
-                leerMasBtn.innerHTML = ' &#9660;';
-            }
-        };
-        descripcionContainer.appendChild(leerMasBtn);
-    }
-
-    productoInfoDiv.appendChild(descripcionContainer);
-}
 
                         productoInfoDiv.appendChild(propiedadesContainer);
+
+                        // Lógica de descripción corta y "leer más"
+                        if (productData['Descripcion']) {
+                            const descripcionContainer = document.createElement('div');
+                            descripcionContainer.classList.add('descripcion-container');
+
+                            const descripcionCompleta = productData['Descripcion'].trim();
+                            const palabras = descripcionCompleta.split(' ');
+                            const descripcionCorta = palabras.length > 10 ? palabras.slice(0, 10).join(' ') + '...' : descripcionCompleta;
+
+                            const spanCorta = document.createElement('span');
+                            spanCorta.classList.add('descripcion-corta');
+                            spanCorta.textContent = descripcionCorta;
+                            descripcionContainer.appendChild(spanCorta);
+
+                            if (palabras.length > 10) {
+                                const spanCompleta = document.createElement('span');
+                                spanCompleta.classList.add('descripcion-completa');
+                                spanCompleta.textContent = descripcionCompleta;
+                                spanCompleta.style.display = 'none'; 
+                                descripcionContainer.appendChild(spanCompleta);
+
+                                const leerMasBtn = document.createElement('button');
+                                leerMasBtn.classList.add('leer-mas-btn');
+                                leerMasBtn.innerHTML = '&#9660;'; 
+                                leerMasBtn.onclick = function() {
+                                    if (spanCompleta.style.display === 'none') {
+                                        spanCompleta.style.display = 'inline';
+                                        spanCorta.style.display = 'none';
+                                        leerMasBtn.innerHTML = '&#9650;'; 
+                                    } else {
+                                        spanCompleta.style.display = 'none';
+                                        spanCorta.style.display = 'inline';
+                                        leerMasBtn.innerHTML = '&#9660;';
+                                    }
+                                };
+                                descripcionContainer.appendChild(leerMasBtn);
+                            }
+                            productoInfoDiv.appendChild(descripcionContainer);
+                        }
 
 
                         const productoActionsDiv = document.createElement('div');
@@ -1347,20 +1348,102 @@ if (productData['Descripción Completa']) {
         }
         // --- Fin Lógica del Escáner QR ---
         
-        // --- Función de Impresión de Carrito ---
+        // --- FUNCIÓN DE IMPRESIÓN SIMPLIFICADA (NUEVA SOLUCIÓN) ---
         function printCart() {
             if (cart.length === 0) {
                 showNotification('El carrito está vacío. Nada que imprimir.');
                 return;
             }
 
-            document.getElementById('cart').style.display = 'none';
+            let rawSubtotal = 0;
+            let finalTotalTicket = 0;
+            let ticketItemsHTML = '';
+
+            // 1. GENERAR EL CONTENIDO DEL TICKET AQUÍ (SÍNCRONO)
+            cart.forEach(item => {
+                const calculation = calculateItemTotal(item);
+                const itemTotal = calculation.itemTotal;
+                const discountMessage = calculation.discountMessage;
+                finalTotalTicket += itemTotal;
+                rawSubtotal += item.price * item.quantity;
+
+                const itemName = item.name.length > 30 ? item.name.substring(0, 27) + '...' : item.name;
+
+                ticketItemsHTML += `
+                    <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+                        <span style="max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${itemName}</span>
+                        <span style="text-align: center; width: 20%;">${item.quantity}</span>
+                        <span style="text-align: right; width: 35%;">$${itemTotal.toFixed(2)}${discountMessage ? '*' : ''}</span>
+                    </div>
+                `;
+            });
             
-            // Retraso para asegurar que el DOM ha procesado el ticket antes de imprimir
-            setTimeout(() => {
-                window.print();
-            }, 50); // Delay de 50ms
+            const totalDiscount = rawSubtotal - finalTotalTicket;
+
+            const printContent = `
+                <html>
+                    <head>
+                        <title>Ticket</title>
+                        <style>
+                            @page { size: 80mm auto; margin: 0; }
+                            body { 
+                                width: 80mm; 
+                                font-family: monospace; 
+                                font-size: 9pt; 
+                                margin: 0;
+                                padding: 0;
+                                color: black;
+                            }
+                            .print-ticket * {
+                                color: black !important;
+                                background: none !important;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="print-ticket" style="width: 80mm; font-family: monospace; font-size: 9pt;">
+                            <h1 style="text-align: center; font-size: 1.2em; margin-bottom: 5px;">DIETÉTICA VIRGILIO</h1>
+                            <p style="text-align: center; font-size: 0.9em; border-bottom: 1px dashed black; padding-bottom: 5px;">Ticket de Pedido - ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+                            <div style="margin-top: 10px; border-bottom: 1px solid black; padding-bottom: 5px; display: flex;">
+                                <span style="font-weight: bold; width: 45%;">PRODUCTO</span>
+                                <span style="font-weight: bold; width: 20%; text-align: center;">CANT</span>
+                                <span style="font-weight: bold; width: 35%; text-align: right;">TOTAL</span>
+                            </div>
+                            
+                            ${ticketItemsHTML}
+                            
+                            <div style="border-top: 1px dashed black; margin-top: 10px; padding-top: 5px;">
+                                <p style="display: flex; justify-content: space-between; margin: 2px 0;"><span>Subtotal:</span><span style="font-weight: bold;">$${rawSubtotal.toFixed(2)}</span></p>
+                                <p style="display: flex; justify-content: space-between; margin: 2px 0;"><span>Descuento:</span><span style="font-weight: bold;">-$${totalDiscount.toFixed(2)}</span></p>
+                                <h3 style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 1.1em;"><span>TOTAL A PAGAR:</span><span>$${finalTotalTicket.toFixed(2)}</span></h3>
+                            </div>
+                            ${totalDiscount > 0 ? '<p style="font-size: 0.8em; margin-top: 5px; text-align: center;">* Descuento aplicado por volumen</p>' : ''}
+                            <p style="text-align: center; margin-top: 15px; font-size: 0.8em;">¡Gracias por tu compra!</p>
+                        </div>
+                    </body>
+                </html>
+            `;
+            
+            // 2. ABRIR UNA NUEVA VENTANA, ESCRIBIR EL CONTENIDO Y FORZAR LA IMPRESIÓN
+            // Usar window.open() es más seguro que manipular un iframe en el DOM principal.
+            const printWindow = window.open('', '_blank', 'width=350,height=400');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            // 3. Forzamos la impresión después de la carga
+            printWindow.onload = () => {
+                 printWindow.focus();
+                 printWindow.print();
+                 // Cerramos la ventana después de la impresión
+                 setTimeout(() => {
+                    printWindow.close();
+                 }, 500);
+            };
+            
+            // 4. Cerramos el carrito principal para no distraer
+            document.getElementById('cart').style.display = 'none';
         }
+        // --- FIN FUNCIÓN DE IMPRESIÓN SIMPLIFICADA ---
 
 
         // --- FUNCIÓN DE MANEJO DE CLIC ---
