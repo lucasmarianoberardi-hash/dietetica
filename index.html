@@ -996,43 +996,43 @@ const securityCodeUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtRvbH
 
                         productoInfoDiv.appendChild(propiedadesContainer);
 
-                        // Lógica de descripción corta y "leer más"
-                        if (productData['Descripcion']) {
-                            const descripcionContainer = document.createElement('div');
-                            descripcionContainer.classList.add('descripcion-container');
+                        // Lógica usando las dos columnas existentes
+if (productData['Descripción Completa']) {
+    const descripcionContainer = document.createElement('div');
+    descripcionContainer.classList.add('descripcion-container');
 
-                            const descripcionCompleta = productData['Descripcion'].trim();
-                            const palabras = descripcionCompleta.split(' ');
-                            const descripcionCorta = palabras.length > 10 ? palabras.slice(0, 10).join(' ') + '...' : descripcionCompleta;
+    // Creamos el elemento de texto
+    const textoDescripcion = document.createElement('span');
+    textoDescripcion.classList.add('descripcion-texto');
+    
+    // Usamos la versión corta por defecto
+    const corta = productData['Descripción Corta'] || '';
+    const completa = productData['Descripción Completa'];
+    
+    textoDescripcion.textContent = corta;
+    descripcionContainer.appendChild(textoDescripcion);
 
-                            const spanCorta = document.createElement('span');
-                            spanCorta.classList.add('descripcion-corta');
-                            spanCorta.textContent = descripcionCorta;
-                            descripcionContainer.appendChild(spanCorta);
+    // Solo añadimos el botón si la descripción completa es distinta a la corta
+    if (completa.length > corta.length) {
+        const leerMasBtn = document.createElement('button');
+        leerMasBtn.classList.add('leer-mas-btn');
+        leerMasBtn.innerHTML = ' &#9660;'; // Flecha hacia abajo
+        leerMasBtn.style.cursor = 'pointer';
 
-                            if (palabras.length > 10) {
-                                const spanCompleta = document.createElement('span');
-                                spanCompleta.classList.add('descripcion-completa');
-                                spanCompleta.textContent = descripcionCompleta;
-                                spanCompleta.style.display = 'none'; 
-                                descripcionContainer.appendChild(spanCompleta);
+        let isExpanded = false;
 
-                                const leerMasBtn = document.createElement('button');
-                                leerMasBtn.classList.add('leer-mas-btn');
-                                leerMasBtn.innerHTML = '&#9660;'; 
-                                leerMasBtn.onclick = function() {
-                                    if (spanCompleta.style.display === 'none') {
-                                        spanCompleta.style.display = 'inline';
-                                        spanCorta.style.display = 'none';
-                                        leerMasBtn.innerHTML = '&#9650;'; 
-                                    } else {
-                                        spanCompleta.style.display = 'none';
-                                        spanCorta.style.display = 'inline';
-                                        leerMasBtn.innerHTML = '&#9660;';
-                                    }
-                                };
-                                descripcionContainer.appendChild(leerMasBtn);
-                            }
+        leerMasBtn.onclick = function() {
+            isExpanded = !isExpanded;
+            if (isExpanded) {
+                textoDescripcion.textContent = completa;
+                leerMasBtn.innerHTML = ' &#9650;'; // Flecha hacia arriba
+            } else {
+                textoDescripcion.textContent = corta;
+                leerMasBtn.innerHTML = ' &#9660;';
+            }
+        };
+        descripcionContainer.appendChild(leerMasBtn);
+    }
                             productoInfoDiv.appendChild(descripcionContainer);
                         }
 
